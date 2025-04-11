@@ -50,7 +50,4 @@ tb_logs/
 *.tmp
 *.bak
 
-# Ignore your specific rollout and model outputs
-expert_rollouts.pkl
-vae_sequences.pt
-col_actor.pth
+
