@@ -23,8 +23,7 @@ Thumbs.db
 # Logs and debug
 *.log
 
-# Model weights / checkpoints
-*.pth
+# checkpoints
 *.pt
 checkpoints/
 
