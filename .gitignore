@@ -1,0 +1,72 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment files
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+*.conda
+*.ipynb_checkpoints
+
+# VSCode & IDE configs
+.vscode/
+.idea/
+
+# Mac & system files
+.DS_Store
+Thumbs.db
+
+# Logs and debug
+*.log
+
+# Data files
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.json
+*.xml
+*.pkl
+*.npy
+*.npz
+data/
+datasets/
+
+# Model weights / checkpoints
+*.pth
+*.pt
+models/
+checkpoints/
+
+# Experiment outputs
+runs/
+results/
+outputs/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Cache
+*.cache
+__pycache__/
+.cache/
+*.egg-info/
+
+# PyTorch Lightning & TensorBoard
+lightning_logs/
+*.ckpt
+tb_logs/
+
+# Temporary experiment files
+*.tmp
+*.bak
+
+# Ignore your specific rollout and model outputs
+expert_rollouts.pkl
+vae_sequences.pt
+col_actor.pth
