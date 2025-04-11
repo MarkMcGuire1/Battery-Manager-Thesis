@@ -6,7 +6,6 @@ __pycache__/
 # Environment files
 .env
 .venv
-env/
 venv/
 ENV/
 env.bak/
@@ -24,23 +23,9 @@ Thumbs.db
 # Logs and debug
 *.log
 
-# Data files
-*.csv
-*.tsv
-*.xlsx
-*.xls
-*.json
-*.xml
-*.pkl
-*.npy
-*.npz
-data/
-datasets/
-
 # Model weights / checkpoints
 *.pth
 *.pt
-models/
 checkpoints/
 
 # Experiment outputs
