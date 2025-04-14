@@ -2,6 +2,7 @@
 # improving learning efficiency in sparse or risky environments.
 
 from experiments.VAE.TrajVAE import TrajVAE
+from experiments.VAE.PsoLatent import PSO_Opt_Latent
 from experiments.Imitation_Learning.PSO_Opt import PSO_Opt, ActorNet, CriticNet
 from experiments.Imitation_Learning.CoL import CoLTrainer, RelayBuffer
 from env.modified_env import FixedSACTradingEnv
@@ -22,17 +23,33 @@ action_dim = env.action_space.shape[0]
 vae = TrajVAE(obs_dim=obs_dim, action_dim=action_dim, latent_dim=16).to("cpu")
 train_VAE(vae, expert_rollouts, batch_size=64, n_epochs=50)
 
-pso = PSO_Opt(env, swarm_size=20, max_iter=100, num_params=vae.latent_dim)
-latent_seqs = pso.optimize(vae, num_particles=100, num_iterations=1000)
+pso = PSO_Opt_Latent(env, vae, swarm_size=20, max_iter=100)
+latent_seqs = pso.optimize()
 
-decoded_trajs = [vae.decode(z_seq) for z_seq in latent_seqs]
+z_array = np.array(latent_seqs[0], dtype=np.float32)  # shape = (16,)
+z = torch.tensor(z_array, dtype = torch.float32).unsqueeze(0)  # shape = (1, 16)
+decoded_trajs = vae.decode(z).detach() 
 
-latent_buffer = RelayBuffer(capacity=100_000)
+latent_buffer = RelayBuffer(capacity=10_000)
 
 for traj in decoded_trajs:
-    latent_buffer.add(traj)  
+    traj = traj.cpu().numpy()
+    for t in range(len(traj) - 1):
+        obs = traj[t, :obs_dim]
+        act = traj[t, obs_dim:]
+        next_obs = traj[t + 1, :obs_dim]
+        reward = 0.0
+        done = (t == len(traj) - 2)
+        latent_buffer.add((obs, act, reward, next_obs, done))
 
-col_trainer = CoLTrainer()
+agent_buffer = RelayBuffer(capacity=100_000)  
+
+actor = ActorNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
+critic = CriticNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
+actor_target = ActorNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
+critic_target = CriticNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
+
+col_trainer = CoLTrainer(env, actor, critic, actor_target, critic_target, latent_buffer, agent_buffer, lambda_bc=1.0, lambda_q=1.0, lambda_actor=1.0, lambda_reg=1e-3, device='cuda' if torch.cuda.is_available() else 'cpu')
 # Option to pretrain from the buffer
 col_trainer.train()
 

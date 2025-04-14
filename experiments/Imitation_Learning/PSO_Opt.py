@@ -74,7 +74,6 @@ class PSO_Opt:
                 except IndexError:
                     # Handle the boundary case
                     print(f"[Fitness] Caught boundary error at hour {hour}")
-                done = True
                 episode_reward += reward
                 hour += 1
 

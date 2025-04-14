@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class TrajVAE(nn.Module):
-    def __init__(self, obs_dim, action_dim, latent_dim, hidden_dim = [64, 64], sequence_len=20):
+    def __init__(self, obs_dim, action_dim, latent_dim, hidden_dim = [64, 64], sequence_len=24):
         super().__init__()
         self.obs_dim = obs_dim
         self.action_dim = action_dim
@@ -37,7 +37,7 @@ class TrajVAE(nn.Module):
     def decode(self, z):
         h = self.decoder_input(z).unsqueeze(1)
         h = h.repeat(1, self.sequence_len, 1)
-        out, _ = self.decoder_fc(h)
+        out, _ = self.decoder_rnn(h)
         reconstructions = self.decoder_fc(out)
         return reconstructions
     

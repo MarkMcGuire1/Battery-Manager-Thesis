@@ -145,26 +145,26 @@ class CoLTrainer:
                 print(f"Step: {step}, AvgReward: {sum(self.rewards_history[-10:]) / max(1, len(self.rewards_history[-10:])):.2f}, BC: {bc_loss:.4f}, Q: {q_loss:.4f}, Actor: {actor_loss:.4f}")
 
 if __name__ == '__main__':
-    with open("expert_pso_rollouts.pkl", "rb") as f:
-        expert_rollouts = pickle.load(f)
+    # with open("expert_pso_rollouts.pkl", "rb") as f:
+    #     expert_rollouts = pickle.load(f)
 
-    expert_buffer = RelayBuffer(capacity=10_000)
-    for r in expert_rollouts:
-        expert_buffer.add(r)
-    agent_buufer = RelayBuffer(capacity=100_000)
+    # expert_buffer = RelayBuffer(capacity=10_000)
+    # for r in expert_rollouts:
+    #     expert_buffer.add(r)
+    # agent_buufer = RelayBuffer(capacity=100_000)
 
-    env = FixedSACTradingEnv()
-    obs_dim = env.observation_space.shape[0]
-    action_dim = env.action_space.shape[0]
+    # env = FixedSACTradingEnv()
+    # obs_dim = env.observation_space.shape[0]
+    # action_dim = env.action_space.shape[0]
 
-    actor = ActorNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
-    critic = CriticNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
-    actor_target = ActorNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
-    critic_target = CriticNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
+    # actor = ActorNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
+    # critic = CriticNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
+    # actor_target = ActorNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
+    # critic_target = CriticNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
 
-    actor_target.load_state_dict(actor.state_dict())
-    critic_target.load_state_dict(critic.state_dict())
+    # actor_target.load_state_dict(actor.state_dict())
+    # critic_target.load_state_dict(critic.state_dict())
 
-    trainer = CoLTrainer(env, actor, critic, actor_target, critic_target, expert_rollouts, buffer_size=1000000, batch_size=256, lambda_bc=1.0, lambda_q=1.0, lambda_actor=1.0, lambda_reg=1e-3, device='cuda' if torch.cuda.is_available() else 'cpu')
-    trainer.train(total_steps=100000, log_interval=1000)
-
+    # trainer = CoLTrainer(env, actor, critic, actor_target, critic_target, expert_rollouts, buffer_size=1000000, batch_size=256, lambda_bc=1.0, lambda_q=1.0, lambda_actor=1.0, lambda_reg=1e-3, device='cuda' if torch.cuda.is_available() else 'cpu')
+    # trainer.train(total_steps=100000, log_interval=1000)
+    print()

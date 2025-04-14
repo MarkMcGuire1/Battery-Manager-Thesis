@@ -28,24 +28,30 @@ mean_reward, expert_trajs = pso_optimizer._evaluate_weights(best_weights, n_epis
 with open('data/expert_pso_rollouts.pkl', 'wb') as f:
     pickle.dump(expert_trajs, f)
 
-expert_buffer = RelayBuffer(capacity=10_000)
-for r in expert_trajs:
-    expert_buffer.add(r)
-agent_buffer = RelayBuffer(capacity=100_000)
+run_CoL = False
 
-env = FixedSACTradingEnv(prices_array, preds_mean, preds_std)
-obs_dim = env.observation_space.shape[0]
-action_dim = env.action_space.shape[0]
+if run_CoL:
+    expert_buffer = RelayBuffer(capacity=10_000)
+    for r in expert_trajs:
+        expert_buffer.add(r)
+    agent_buffer = RelayBuffer(capacity=100_000)
 
-actor = ActorNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
-critic = CriticNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
-actor_target = ActorNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
-critic_target = CriticNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
+    env = FixedSACTradingEnv(prices_array, preds_mean, preds_std)
+    obs_dim = env.observation_space.shape[0]
+    action_dim = env.action_space.shape[0]
 
-actor_target.load_state_dict(actor.state_dict())
-critic_target.load_state_dict(critic.state_dict())
+    actor = ActorNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
+    critic = CriticNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
+    actor_target = ActorNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
+    critic_target = CriticNet(obs_dim, action_dim).to('cuda' if torch.cuda.is_available() else 'cpu')
 
-trainer = CoLTrainer(env, actor, critic, actor_target, critic_target, expert_buffer, agent_buffer, lambda_bc=1.0, lambda_q=1.0, lambda_actor=1.0, lambda_reg=1e-3, device='cuda' if torch.cuda.is_available() else 'cpu')
-trainer.train(total_steps=100000, log_interval=1000)
+    actor_target.load_state_dict(actor.state_dict())
+    critic_target.load_state_dict(critic.state_dict())
 
-torch.save(actor.state_dict(), 'models/col_actor.pth')
+    trainer = CoLTrainer(env, actor, critic, actor_target, critic_target, expert_buffer, agent_buffer, lambda_bc=1.0, lambda_q=1.0, lambda_actor=1.0, lambda_reg=1e-3, device='cuda' if torch.cuda.is_available() else 'cpu')
+    trainer.train(total_steps=100000, log_interval=1000)
+
+    torch.save(actor.state_dict(), 'models/col_actor.pth')
+
+else:
+    print('expert rollouts saved to data/expert_pso_rollouts.pkl')
