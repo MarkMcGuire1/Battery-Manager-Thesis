@@ -24,11 +24,9 @@ vae = TrajVAE(obs_dim=obs_dim, action_dim=action_dim, latent_dim=16).to("cpu")
 train_VAE(vae, expert_rollouts, batch_size=64, n_epochs=50)
 
 pso = PSO_Opt_Latent(env, vae, swarm_size=20, max_iter=100)
-latent_seqs = pso.optimize()
+latent_seqs = [pso.optimize()[0] for _ in range(20)]  
 
-z_array = np.array(latent_seqs[0], dtype=np.float32)  # shape = (16,)
-z = torch.tensor(z_array, dtype = torch.float32).unsqueeze(0)  # shape = (1, 16)
-decoded_trajs = vae.decode(z).detach() 
+decoded_trajs = [vae.decode(torch.tensor(z, dtype=torch.float32).unsqueeze(0)).detach().squeeze(0) for z in latent_seqs] 
 
 latent_buffer = RelayBuffer(capacity=10_000)
 
