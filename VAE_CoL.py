@@ -12,7 +12,7 @@ import pickle
 import torch
 import numpy as np
 
-with open("data/expert_pso_rollouts.pkl", "rb") as f:
+with open("data/expert_pso_rollouts_500_eps.pkl", "rb") as f:
     expert_rollouts = pickle.load(f)
 
 prices_array, preds_mean, preds_std = load_data(year=2019)

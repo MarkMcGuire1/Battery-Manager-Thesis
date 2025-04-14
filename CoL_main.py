@@ -24,8 +24,8 @@ max_iter = 100
 pso_optimizer = PSO_Opt(env, swarm_size, max_iter, num_params)
 best_weights, _ = pso_optimizer.optimize()
 
-mean_reward, expert_trajs = pso_optimizer._evaluate_weights(best_weights, n_episodes = 100, return_trajs=True)
-with open('data/expert_pso_rollouts.pkl', 'wb') as f:
+mean_reward, expert_trajs = pso_optimizer._evaluate_weights(best_weights, n_episodes = 500, return_trajs=True, seed_reset=True)
+with open('data/expert_pso_rollouts_500_eps.pkl', 'wb') as f:
     pickle.dump(expert_trajs, f)
 
 run_CoL = False

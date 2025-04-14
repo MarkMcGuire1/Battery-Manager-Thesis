@@ -26,7 +26,7 @@ class PSO_Opt:
         
         return best_weights, best_value
     
-    def _evaluate_weights(self, weights, n_episodes = 10, return_trajs = False):
+    def _evaluate_weights(self, weights, n_episodes = 10, return_trajs = False, seed_reset = False):
         """Evaluate a set of weights using the current environment"""
         # For evaluation, create a custom policy and load weights
         obs_dim = self._env.observation_space.shape[0]
@@ -52,6 +52,9 @@ class PSO_Opt:
         
         for _ in range(n_episodes):
             done = False
+            if seed_reset:
+                seed = np.random.randint(0, 1e6)
+                self._env.seed(seed)
             obs, _ = self._env.reset()
             episode_reward = 0
             ep_trajs = []

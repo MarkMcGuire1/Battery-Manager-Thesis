@@ -84,9 +84,9 @@ class CoLTrainer:
         # Critic loss 
         with torch.no_grad():
             target_actions = self.actor_target(next_states)
-            target_Q = self.critic_target(next_states, target_actions)
-            target_Q = rewards + self.gamma * (1 - dones) * target_Q
-
+            target_critic = self.critic_target(next_states, target_actions)
+            target_Q = rewards + self.gamma * (1 - dones) * target_critic
+            target_Q = torch.clamp(target_Q, min = -10.0, max = 10.0)
         current_Q = self.critic(states, actions)
         q_loss = F.mse_loss(current_Q, target_Q)
 
@@ -135,11 +135,20 @@ class CoLTrainer:
                 self.actor_optimizer.zero_grad()
                 self.critic_optimizer.zero_grad()
                 loss.backward()
+                # Clip gradients
+                torch.nn.utils.clip_grad_norm_(self.actor.parameters(), 1.0)
+                torch.nn.utils.clip_grad_norm_(self.critic.parameters(), 1.0)
                 self.actor_optimizer.step()
                 self.critic_optimizer.step()
 
                 self.soft_update(self.actor, self.actor_target)
                 self.soft_update(self.critic, self.critic_target)
+
+                # if q_loss > 10.0:
+                #     print(f"Warning: Q loss is high: {q_loss}")
+                #     self.lambda_bc *= 1.1
+                #     self.lambda_q *= 0.9
+                #     print(f"Adjusted lambda_bc: {self.lambda_bc}, lambda_q: {self.lambda_q}") 
 
             if step % log_interval == 0:
                 print(f"Step: {step}, AvgReward: {sum(self.rewards_history[-10:]) / max(1, len(self.rewards_history[-10:])):.2f}, BC: {bc_loss:.4f}, Q: {q_loss:.4f}, Actor: {actor_loss:.4f}")
