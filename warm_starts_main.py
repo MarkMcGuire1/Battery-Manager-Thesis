@@ -20,8 +20,8 @@ disc_env_2019 = TradingEnv(prices_2019, preds_mean_2019, preds_std_2019, action_
 disc_env_2020 = TradingEnv(prices_2020, preds_mean_2020, preds_std_2020, action_type='discrete')
 
 # Train Models
-#SAC_model_init, SAC_time_init, SAC_opt_time_init, SAC_mean_reward_init, SAC_std_reward_init = train_SAC(experiment_id,  cont_env_2019, initialize_weights=True, search_algo='pso')
-#SAC_model_no_init, SAC_time_no_init, SAC_opt_time_no_init, SAC_mean_reward_no_init, SAC_std_reward_no_init = train_SAC(experiment_id, cont_env_2019)
+SAC_model_init, SAC_time_init, SAC_opt_time_init, SAC_mean_reward_init, SAC_std_reward_init = train_SAC(experiment_id,  cont_env_2019, initialize_weights=True, search_algo='pso')
+SAC_model_no_init, SAC_time_no_init, SAC_opt_time_no_init, SAC_mean_reward_no_init, SAC_std_reward_no_init = train_SAC(experiment_id, cont_env_2019)
 DDPG_model_init, DDPG_time_init, DDPG_opt_time_init, DDPG_mean_reward_init, DDPG_std_reward_init = train_DDPG(experiment_id, cont_env_2019, initialize_weights=True, search_algo='pso')
 DDPG_model_no_init, DDPG_time_no_init, DDPG_opt_time_no_init, DDPG_mean_reward_no_init, DDPG_std_reward_no_init = train_DDPG(experiment_id, cont_env_2019)
 DQN_model_init, DQN_time_init, DQN_opt_time_init, DQN_mean_reward_init, DQN_std_reward_init = train_DQN(experiment_id, disc_env_2019, initialize_weights=True, search_algo='pso')
