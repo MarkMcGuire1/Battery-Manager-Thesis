@@ -21,7 +21,7 @@ hour_now = datetime.now().strftime("%H%M%S")
 models_dir = parent_dir / "models" / "RL"
 models_dir.mkdir(parents=True, exist_ok=True)
 
-def train_DDPG(price_dict, forecast_dict, experiment_id, env, initialize_weights=False, search_algo = None, pso_params=None):
+def train_DDPG(experiment_id, env, initialize_weights=False, search_algo = None, pso_params=None):
     check_env(env, warn=True)
 
     log_dir = f"./logs/DDPG_{search_algo}_{experiment_id}_{hour_now}"
@@ -100,9 +100,11 @@ def train_DDPG(price_dict, forecast_dict, experiment_id, env, initialize_weights
         print("Loading weights into DDPG model")
         model.policy.load_state_dict(new_params)
         print("Weights initialized")
-    
+    else:
+        optimize_time = None
+        print("No weights to initialize")
     start_time_SAC = datetime.now()
-    model.learn(total_timesteps=500000)
+    model.learn(total_timesteps=240000)
     training_time = datetime.now() - start_time_SAC
 
     mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=365)

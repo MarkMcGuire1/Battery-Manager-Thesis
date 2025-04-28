@@ -32,7 +32,7 @@ models_dir.mkdir(parents=True, exist_ok=True)
 
 
 
-def train_DQN(prices, forecasts, experiment_id, uncertainties, env, initialize_weights=False, search_algo = None, pso_params=None):
+def train_DQN(experiment_id, env, initialize_weights=False, search_algo = None, pso_params=None):
     check_env(env, warn=True)
 
     log_dir = f"./logs/DQN_{search_algo}_{experiment_id}_{hour_now}"
@@ -135,13 +135,14 @@ def train_DQN(prices, forecasts, experiment_id, uncertainties, env, initialize_w
                 size = np.prod(shape)
                 new_params[key] = torch.tensor(best_position[i: i + size].reshape(shape), dtype=torch.float32)
                 i += size
-                
+        elif not initialize_weights:
+            optimize_time = None
         print("Loading weights into DQN model")
         model.policy.load_state_dict(new_params)
         print("Weights initialized")
     
     start_time_DQN = datetime.now()
-    model.learn(total_timesteps=500000)
+    model.learn(total_timesteps=240000)
     training_time = datetime.now() - start_time_DQN
 
     mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=365)

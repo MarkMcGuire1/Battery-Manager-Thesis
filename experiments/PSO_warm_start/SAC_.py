@@ -97,9 +97,10 @@ def train_SAC(experiment_id, env, initialize_weights=False, search_algo = None):
         print("Loading weights into DQN model")
         model.policy.load_state_dict(new_params)
         print("Weights initialized")
-    
+    else:
+        optimize_time = 0
     start_time_SAC = datetime.now()
-    model.learn(total_timesteps=500000)
+    model.learn(total_timesteps=240000)
     training_time = datetime.now() - start_time_SAC
 
     mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=365)
