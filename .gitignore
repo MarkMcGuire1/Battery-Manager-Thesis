@@ -32,6 +32,7 @@ checkpoints/
 runs/
 results/
 outputs/
+models/
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
