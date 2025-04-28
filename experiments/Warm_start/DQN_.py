@@ -8,6 +8,8 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecCheckNan
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.logger import configure
+from env_template_test import EnergyTradingEnv
+from new_envs_samples import DiscreteEnergyTradingEnv
 import os
 import sys
 from pathlib import Path
@@ -32,7 +34,8 @@ models_dir.mkdir(parents=True, exist_ok=True)
 
 
 
-def train_DQN(prices, forecasts, experiment_id, uncertainties, env, initialize_weights=False, search_algo = None, pso_params=None):
+def train_DQN(prices, forecasts, experiment_id, uncertainties, initialize_weights=False, search_algo = None, pso_params=None):
+    env = DiscreteEnergyTradingEnv(prices, forecasts, uncertainties)
     check_env(env, warn=True)
 
     log_dir = f"./logs/DQN_{search_algo}_{experiment_id}_{hour_now}"

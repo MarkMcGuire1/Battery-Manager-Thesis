@@ -8,6 +8,9 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.logger import configure
 from stable_baselines3.common.evaluation import evaluate_policy
+from env_template_test import EnergyTradingEnv
+#from new_envs_samples import ContinuousEnergyTradingEnv
+from continuous_env import ContinuousEnergyTradingEnv
 from datetime import datetime
 from pathlib import Path
 
@@ -21,7 +24,8 @@ hour_now = datetime.now().strftime("%H%M%S")
 models_dir = parent_dir / "models" / "RL"
 models_dir.mkdir(parents=True, exist_ok=True)
 
-def train_DDPG(price_dict, forecast_dict, experiment_id, env, initialize_weights=False, search_algo = None, pso_params=None):
+def train_DDPG(price_dict, forecast_dict, experiment_id, initialize_weights=False, search_algo = None, pso_params=None):
+    env = ContinuousEnergyTradingEnv(price_dict, forecast_dict)
     check_env(env, warn=True)
 
     log_dir = f"./logs/DDPG_{search_algo}_{experiment_id}_{hour_now}"
@@ -96,11 +100,11 @@ def train_DDPG(price_dict, forecast_dict, experiment_id, env, initialize_weights
 
     model.set_logger(logger)
 
-    if initialize_weights:
-        print("Loading weights into DDPG model")
-        model.policy.load_state_dict(new_params)
-        print("Weights initialized")
-    
+
+    print("Loading weights into DQN model")
+    model.policy.load_state_dict(new_params)
+    print("Weights initialized")
+
     start_time_SAC = datetime.now()
     model.learn(total_timesteps=500000)
     training_time = datetime.now() - start_time_SAC

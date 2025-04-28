@@ -21,6 +21,8 @@ Thumbs.db
 
 # Logs and debug
 *.log
+logs/
+logs
 
 # checkpoints
 *.pt

@@ -39,11 +39,6 @@ def add_noise(data, column, noise_std = 0.05):
 
     return noisy_data
 
-def price_per_hour(data):
-    data['price_euros_mwh'] = data['Price']
-    data.drop(columns=['Price', 'LOAD_DA_FORECAST', 'Renewables_DA_Forecast', 'EUA', 'API2_COAL', 'TTF_GAS', 'Brent_oil'], inplace=True)
-    return data
-
 
 def reconfigure_index(data):
     

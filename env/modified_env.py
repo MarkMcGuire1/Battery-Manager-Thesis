@@ -3,17 +3,18 @@ import gymnasium as gym
 from gymnasium import spaces
 import random
 
-class FixedSACTradingEnv(gym.Env):
+class TradingEnv(gym.Env):
     """
     Fixed version of the SACTradingEnv that correctly handles boundary conditions
     """
-    def __init__(self, prices, forecasts, uncertainty, mode = 'Train', battery_capacity=3.6, max_power=3.6, eff_c=0.9, eff_d=0.8):
-        super(FixedSACTradingEnv, self).__init__()
+    def __init__(self, prices, forecasts, uncertainty, mode = 'Train', battery_capacity=3.6, max_power=3.6, eff_c=0.9, eff_d=0.8, action_type='continuous'):
+        super(TradingEnv, self).__init__()
         
         self.prices = prices  # 2D array [days, hours]
         self.forecasts = forecasts  # forecasted prices
         self.standard_devs = uncertainty  # forecasted uncertainty
         self.mode = mode
+        self.action_type = action_type.lower()
         
         # Battery parameters
         self.battery_capacity = battery_capacity  # MWh
@@ -21,9 +22,13 @@ class FixedSACTradingEnv(gym.Env):
         self.eff_c = eff_c  # charging efficiency
         self.eff_d = eff_d  # discharging efficiency
         
-        # Continuous action space from -1 (full discharge) to 1 (full charge)
-        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32)
-        
+        if self.action_type == 'continuous':
+            # Continuous action space from -1 (full discharge) to 1 (full charge)
+            self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32)
+        elif self.action_type == 'discrete':
+            # Discrete action space with 5 actions: -1, -0.5, 0, 0.5, 1
+            self.action_space = spaces.Discrete(3)    
+
         # State space: [SoC, current_price, next_price, uncertainty]
         self.observation_space = spaces.Box(
             low=np.array([0.0, -1.0, -1.0, 0.0]), 
@@ -79,11 +84,21 @@ class FixedSACTradingEnv(gym.Env):
         # Get current price (unnormalized for reward calculation)
         day_prices = self.prices[self.day]
         price = day_prices[self.hour]
-        
-        # Process action (which is a numpy array from gym's perspective)
-        if isinstance(action, np.ndarray):
-            action = action[0]  # Extract scalar from array
-        
+
+        if self.action_type == 'discrete':
+            # Map discrete action to power level
+            if action == 0:
+                power = -self.max_power
+            if action == 1:
+                power = 0.0
+            if action == 2:
+                power = self.max_power
+                
+        elif self.action_type == 'continuous':
+            # Process action (which is a numpy array from gym's perspective)
+            if isinstance(action, np.ndarray):
+                action = action[0]  # Extract scalar from array
+            
         # Convert action to power level
         power = float(action) * self.max_power
         
