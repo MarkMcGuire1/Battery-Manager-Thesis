@@ -31,8 +31,10 @@ checkpoints/
 # Experiment outputs
 runs/
 results/
+**/*results*/
 outputs/
 models/
+models/*
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints

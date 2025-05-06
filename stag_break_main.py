@@ -1,22 +1,26 @@
 from utils.rl_utils import *
 from utils.load_data import load_data
-from env.modified_env import FixedSACTradingEnv
+from env.modified_env import TradingEnv
 from experiments.Stagnation_break.SAC_PSO_framework import *
 from stable_baselines3 import SAC
+from time import time
+import matplotlib.pyplot as plt
 
 
 prices_array, preds_mean, preds_std = load_data(2019)
 
-env = FixedSACTradingEnv(prices_array, preds_mean, preds_std)
+env = TradingEnv(prices_array, preds_mean, preds_std)
 
 print("Creating SAC model...")
 model = SAC('MlpPolicy', env, verbose=1, policy_kwargs=dict(net_arch=[64, 64]))
 
 # Create callback with PSO integration
-callback = SequentialPSOCallback(check_freq=1000, eval_freq=500, pso_freq=2500)  # Increased pso_freq
+callback = SequentialPSOCallback(env, check_freq=1000, eval_freq=500, pso_freq=2500)  # Increased pso_freq
 
 print("Starting training...")
+start_time = time()
 model.learn(total_timesteps=100000, callback=callback, log_interval=1000)
+training_time = time() - start_time
 print("Training complete.")
 
 # Save model
@@ -66,3 +70,12 @@ if action_differences:
     plt.close()
 
 print("Training complete. Check the logs directory for performance plots.")
+
+optimize_time = None
+experiment_id = f'{datetime.now().strftime("%Y%m%d_%H%M%S")}'
+results_dir = f"./results_stagnation_break/{experiment_id}"
+
+# Log Training Results
+log_training_results(
+    model, training_time, optimize_time, sac_mean_reward, sac_std_reward, results_dir, experiment_id, "SAC_PSO",
+)

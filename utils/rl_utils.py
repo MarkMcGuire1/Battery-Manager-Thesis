@@ -5,6 +5,7 @@ import csv
 import matplotlib.pyplot as plt
 from datetime import datetime
 from stable_baselines3.common.evaluation import evaluate_policy
+from pathlib import Path
 
 def create_24h_preds(predictions, test_data):
     predictions_dict = {}
@@ -123,9 +124,11 @@ def log_evaluation_results(model, env, accumulated_profit, reward_log, results_d
     print(f"Evaluation results saved in {results_dir}")
 
 
-def log_training_results(training_time, optimize_time, mean_reward, std_reward, results_dir, experiment_id, model_name):
-    results_dir = results_dir / 'Model Evaluation' / model_name / experiment_id
+def log_training_results(model, training_time, optimize_time, mean_reward, std_reward, results_dir, experiment_id, model_name):
+    results_dir = Path(results_dir) / 'Model Evaluation' / model_name / experiment_id
     os.makedirs(results_dir, exist_ok=True)
+    model_path = results_dir / f"{model_name}_model_{experiment_id}.zip"
+    model.save(model_path)
     csv_file = os.path.join(results_dir, f"{model_name}_training_results.csv")
     with open(csv_file, mode="w", newline="") as file:
         writer = csv.writer(file)

@@ -100,6 +100,11 @@ def train_SAC(experiment_id, env, initialize_weights=False, search_algo = None):
     else:
         optimize_time = 0
     start_time_SAC = datetime.now()
+
+    for param in model.policy.parameters():
+        if param is not None:
+            torch.nn.utils.clip_grad_norm_(param, max_norm=1.0)
+
     model.learn(total_timesteps=240000)
     training_time = datetime.now() - start_time_SAC
 

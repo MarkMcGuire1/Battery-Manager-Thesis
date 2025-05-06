@@ -135,11 +135,11 @@ def train_DQN(experiment_id, env, initialize_weights=False, search_algo = None, 
                 size = np.prod(shape)
                 new_params[key] = torch.tensor(best_position[i: i + size].reshape(shape), dtype=torch.float32)
                 i += size
-        elif not initialize_weights:
-            optimize_time = None
         print("Loading weights into DQN model")
         model.policy.load_state_dict(new_params)
         print("Weights initialized")
+    elif not initialize_weights:
+            optimize_time = None
     
     start_time_DQN = datetime.now()
     model.learn(total_timesteps=240000)

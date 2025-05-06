@@ -1,12 +1,14 @@
 import torch
 from experiments.Imitation_Learning.CoL import ActorNet
-from env.modified_env import FixedSACTradingEnv
+from env.modified_env import TradingEnv
 from utils.load_data import load_data
 import matplotlib.pyplot as plt
+import os
+import numpy as np
 
 prices, predictions, uncertainties = load_data(year=2020)
 
-env = FixedSACTradingEnv(prices, predictions, uncertainties)
+env = TradingEnv(prices, predictions, uncertainties)
 
 obs_dim = env.observation_space.shape[0]
 action_dim = env.action_space.shape[0]
@@ -16,15 +18,12 @@ actor = ActorNet(obs_dim, action_dim).to('cpu')
 actor.load_state_dict(torch.load('models/col_actor.pth'))
 actor.eval()
 
-
 # Evaluation
 accumulated_profit = [0]
 reward_log = []
 #action_counts = {0: 0, 1: 0, 2: 0}
 print("number of days in test set",len(prices))
 for i in range(len(prices) - 1):
-    
-    print(i)
     env.eval_index = i
     obs, _ = env.reset()
     done = False
@@ -43,7 +42,7 @@ for i in range(len(prices) - 1):
     accumulated_profit.append(accumulated_profit[-1] + episode_profit)
 
 print('plotting profits')
-plt.figure()
+fig = plt.figure()
 plt.plot(accumulated_profit, label='Accumulated Profit', color='blue')
 plt.xlabel("Test Episode")
 plt.ylabel("Total Profit (€)")
@@ -52,3 +51,9 @@ plt.legend()
 plt.grid(True)
 plt.tight_layout()
 plt.show()
+
+results_dir = 'results_col'
+os.makedirs(results_dir, exist_ok=True)
+np.save(os.path.join(results_dir, 'accumulated_profit_col.npy'), accumulated_profit)
+fig.savefig(os.path.join(results_dir, 'accumulated_profit_col.png'))
+np.save(os.path.join(results_dir, 'reward_log_col.npy'), reward_log)

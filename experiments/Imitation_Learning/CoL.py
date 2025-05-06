@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from torch.optim import Adam
 from collections import deque
 import random
-from env.modified_env import FixedSACTradingEnv
+from env.modified_env import TradingEnv
 import pickle
 from experiments.Imitation_Learning.PSO_Opt import ActorNet, CriticNet
 
@@ -152,6 +152,12 @@ class CoLTrainer:
 
             if step % log_interval == 0:
                 print(f"Step: {step}, AvgReward: {sum(self.rewards_history[-10:]) / max(1, len(self.rewards_history[-10:])):.2f}, BC: {bc_loss:.4f}, Q: {q_loss:.4f}, Actor: {actor_loss:.4f}")
+
+    def predict(self, obs, deterministic=True):
+        obs_tensor = torch.tensor(obs, dtype=torch.float32).unsqueeze(0).to(self.device)
+        with torch.no_grad():
+            action = self.actor(obs_tensor).cpu().numpy()[0]
+        return action, None
 
 if __name__ == '__main__':
     # with open("expert_pso_rollouts.pkl", "rb") as f:

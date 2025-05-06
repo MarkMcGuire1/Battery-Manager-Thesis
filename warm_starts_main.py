@@ -21,28 +21,32 @@ disc_env_2020 = TradingEnv(prices_2020, preds_mean_2020, preds_std_2020, action_
 
 # Train Models
 SAC_model_init, SAC_time_init, SAC_opt_time_init, SAC_mean_reward_init, SAC_std_reward_init = train_SAC(experiment_id,  cont_env_2019, initialize_weights=True, search_algo='pso')
+log_training_results(
+   SAC_model_init, SAC_time_init, SAC_opt_time_init, SAC_mean_reward_init, SAC_std_reward_init, results_folder, experiment_id, "SAC_init", 
+)
+
 SAC_model_no_init, SAC_time_no_init, SAC_opt_time_no_init, SAC_mean_reward_no_init, SAC_std_reward_no_init = train_SAC(experiment_id, cont_env_2019)
+log_training_results(
+   SAC_model_no_init, SAC_time_no_init, SAC_opt_time_no_init, SAC_mean_reward_no_init, SAC_std_reward_no_init, results_folder, experiment_id,  "SAC_no_init",
+)
+
 DDPG_model_init, DDPG_time_init, DDPG_opt_time_init, DDPG_mean_reward_init, DDPG_std_reward_init = train_DDPG(experiment_id, cont_env_2019, initialize_weights=True, search_algo='pso')
+log_training_results(
+    DDPG_model_init, DDPG_time_init, DDPG_opt_time_init, DDPG_mean_reward_init, DDPG_std_reward_init, results_folder, experiment_id, "DDPG_init", 
+)
+
 DDPG_model_no_init, DDPG_time_no_init, DDPG_opt_time_no_init, DDPG_mean_reward_no_init, DDPG_std_reward_no_init = train_DDPG(experiment_id, cont_env_2019)
+log_training_results(
+    DDPG_model_no_init, DDPG_time_no_init, DDPG_opt_time_no_init, DDPG_mean_reward_no_init, DDPG_std_reward_no_init, results_folder, experiment_id, "DDPG_no_init",
+)
+
+
 DQN_model_init, DQN_time_init, DQN_opt_time_init, DQN_mean_reward_init, DQN_std_reward_init = train_DQN(experiment_id, disc_env_2019, initialize_weights=True, search_algo='pso')
+log_training_results(
+    DQN_model_init, DQN_time_init, DQN_opt_time_init, DQN_mean_reward_init, DQN_std_reward_init, results_folder, experiment_id, "DQN_init"
+)
+
 DQN_model_no_init, DQN_time_no_init, DQN_opt_time_no_init, DQN_mean_reward_no_init, DQN_std_reward_no_init = train_DQN(experiment_id, disc_env_2019)
-
 log_training_results(
-   SAC_time_init, SAC_opt_time_init, SAC_mean_reward_init, SAC_std_reward_init, results_folder, experiment_id, "SAC_init", 
+    DQN_model_no_init, DQN_time_no_init, DQN_opt_time_no_init, DQN_mean_reward_no_init, DQN_std_reward_no_init, results_folder,  experiment_id, "DQN_no_init",
 )
-log_training_results(
-   SAC_time_no_init, SAC_opt_time_no_init, SAC_mean_reward_no_init, SAC_std_reward_no_init, results_folder, experiment_id,  "SAC_no_init",
-)
-log_training_results(
-    DDPG_time_init, DDPG_opt_time_init, DDPG_mean_reward_init, DDPG_std_reward_init, results_folder, experiment_id, "DDPG_init", 
-)
-log_training_results(
-    DDPG_time_no_init, DDPG_opt_time_no_init, DDPG_mean_reward_no_init, DDPG_std_reward_no_init, results_folder, experiment_id, "DDPG_no_init",
-)
-log_training_results(
-    DQN_time_init, DQN_opt_time_init, DQN_mean_reward_init, DQN_std_reward_init, results_folder, experiment_id, "DQN_init"
-)
-log_training_results(
-    DQN_time_no_init, DQN_opt_time_no_init, DQN_mean_reward_no_init, DQN_std_reward_no_init, results_folder,  experiment_id, "DQN_no_init",
-)
-
