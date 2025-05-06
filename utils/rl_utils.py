@@ -125,7 +125,7 @@ def log_evaluation_results(model, env, accumulated_profit, reward_log, results_d
 
 
 def log_training_results(model, training_time, optimize_time, mean_reward, std_reward, results_dir, experiment_id, model_name):
-    results_dir = Path(results_dir) / 'Model Evaluation' / model_name / experiment_id
+    results_dir = Path(results_dir) / f'Model Evaluation_{model_name}' / experiment_id
     os.makedirs(results_dir, exist_ok=True)
     model_path = results_dir / f"{model_name}_model_{experiment_id}.zip"
     model.save(model_path)
@@ -137,3 +137,16 @@ def log_training_results(model, training_time, optimize_time, mean_reward, std_r
         writer.writerow(["Optimize Time", optimize_time])
         writer.writerow(["Mean Reward", mean_reward])
         writer.writerow(["Reward Std Dev", std_reward])
+
+def set_global_seed(seed):
+    import random
+    import numpy as np
+    import torch
+    import os
+
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)

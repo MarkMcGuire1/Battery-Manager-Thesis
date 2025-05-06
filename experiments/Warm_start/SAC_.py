@@ -9,9 +9,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.logger import configure
 from stable_baselines3.common.evaluation import evaluate_policy
-from env_template_test import EnergyTradingEnv
-#from new_envs_samples import ContinuousEnergyTradingEnv
-from continuous_env import ContinuousEnergyTradingEnv
+from env.modified_env import TradingEnv
 from datetime import datetime
 from pathlib import Path
 
@@ -25,11 +23,11 @@ hour_now = datetime.now().strftime("%H%M%S")
 models_dir = parent_dir / "models" / "RL"
 models_dir.mkdir(parents=True, exist_ok=True)
 
-def train_SAC(price_dict, forecast_dict, experiment_id, initialize_weights=False, search_algo = None, pso_params=None):
-    env = ContinuousEnergyTradingEnv(price_dict, forecast_dict)
+def train_SAC(prices, forecasts, uncertainties, experiment_id, initialize_weights=False):
+    env = TradingEnv(prices, forecasts, uncertainties)
     check_env(env, warn=True)
 
-    log_dir = f"./logs/SAC_{search_algo}_{experiment_id}_{hour_now}"
+    log_dir = f"./logs/SAC_{experiment_id}_{hour_now}"
     logger = configure(log_dir, ["stdout", "csv", "tensorboard"])
 
     env = Monitor(env, log_dir)
@@ -63,28 +61,14 @@ def train_SAC(price_dict, forecast_dict, experiment_id, initialize_weights=False
         model = SAC("MlpPolicy", env = DummyVecEnv([lambda: env]), verbose = 1)
         num_params = sum(p.numel() for p in model.policy.parameters())
 
-        if search_algo == 'pso':
-            start_time = datetime.now()
-            best_weights, _ = pso(
-                pso_objective,
-                lb=np.full(num_params,-1),
-            ub=np.full(num_params,1),
-            swarmsize=20,
-            maxiter=100,
-        )
-            
-        elif search_algo == 'gwo':
-            problem = {
-                "bounds": FloatVar(lb=np.full(num_params,-1), ub=np.full(num_params,1), name = "weights"),
-                "minmax": "min",
-                "obj_func": pso_objective
-            }
-            start_time = datetime.now()
-            optimizer = GWO.OriginalGWO(epoch=100, pop_size=20)
-            best = optimizer.solve(problem)
-            best_weights = best.solution
-
-                
+        start_time = datetime.now()
+        best_weights, _ = pso(
+            pso_objective,
+            lb=np.full(num_params,-1),
+        ub=np.full(num_params,1),
+        swarmsize=20,
+        maxiter=100,
+    )        
         optimize_time = datetime.now() - start_time 
         params = model.policy.state_dict()
         i = 0

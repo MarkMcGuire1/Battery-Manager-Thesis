@@ -1,6 +1,7 @@
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
+from gymnasium.utils import seeding
 import random
 
 class TradingEnv(gym.Env):
@@ -52,17 +53,20 @@ class TradingEnv(gym.Env):
         """Normalize a value to [0, 1] range"""
         return np.clip((value - v_min) / (v_max - v_min), 0, 1)
     
-    def reset(self, seed=None, options=None):
+    def reset(self, seed=None):
         """Reset the environment to start a new episode (day)"""
         super().reset(seed=seed)
+        if seed is not None:
+            self.seed(seed)
         
         if self.mode == 'Train':
             # Choose a random day
-            self.day = np.random.randint(0, len(self.prices))
+            self.day = self.np_random.integers(0, len(self.prices))
             self.hour = 0
-            self.soc = 0.5  # Start with half-charged battery
+            self.soc = self.np_random.uniform(0.3, 0.7) 
         elif self.mode == 'Eval':
-            self.day = self.eval_index # Fixed day for evaluation
+            self.day = self.eval_index 
+            
             self.hour = 0  
             if self.eval_index == 0:
                 self.soc = 0.5 # Start with half-charged battery  
@@ -164,7 +168,7 @@ class TradingEnv(gym.Env):
     def seed(self, seed=None):
         """Set random seed for reproducibility"""
         self._seed = seed
-        np.random.seed(seed)
+        self.np_random, seed = seeding.np_random(seed)
         random.seed(seed)
         if hasattr(self.action_space, 'seed'):
             self.action_space.seed(seed)

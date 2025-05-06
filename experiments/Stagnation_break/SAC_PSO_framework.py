@@ -16,12 +16,6 @@ os.makedirs('logs', exist_ok=True)
 
 id = f'PSO_SAC_sequential_{datetime.now().strftime("%Y%m%d_%H%M%S")}'
 
-# Tracking progress
-pso_rewards = []
-sac_rewards = []
-distillation_events = []
-action_differences = []
-timestamps = []
 
 class SequentialPSOCallback(BaseCallback):
     def __init__(self, env, check_freq=1000, eval_freq=5000, pso_freq=10000, mse_thres = 0.1, patience = 3, verbose=1):
@@ -41,6 +35,13 @@ class SequentialPSOCallback(BaseCallback):
         # Store environment and model references for PSO
         self._env = None
         self._model = None
+
+        # Tracking progress
+        self.pso_rewards = []
+        self.sac_rewards = []
+        self.distillation_events = []
+        self.action_differences = []
+        self.timestamps = []
     
     def _on_step(self):
         # Store environment and model references if not already stored
@@ -56,8 +57,8 @@ class SequentialPSOCallback(BaseCallback):
             sac_mean_reward, _ = evaluate_policy(self.model, self.model.get_env(), n_eval_episodes=5)
             print(f"[SAC Evaluation] Step {self.n_calls}, Mean reward: {sac_mean_reward}")
             
-            sac_rewards.append(sac_mean_reward)
-            timestamps.append(self.n_calls)
+            self.sac_rewards.append(sac_mean_reward)
+            self.timestamps.append(self.n_calls)
             self._save_learning_curve()
 
             if sac_mean_reward > self.best_reward + 0.5:
@@ -113,7 +114,7 @@ class SequentialPSOCallback(BaseCallback):
                     self.best_reward = candidate_reward
                     self.best_weights = best_weights.copy()
                     print(f"[PSO] New best reward: {candidate_reward}")
-                    pso_rewards.append((self.n_calls, candidate_reward))
+                    self.pso_rewards.append((self.n_calls, candidate_reward))
                 
                 # Distill PSO policy into SAC if significant improvement
                 if self.best_weights is not None:
@@ -213,7 +214,7 @@ class SequentialPSOCallback(BaseCallback):
         # Compute MSE between actions
         action_diff = F.mse_loss(pso_actions, sac_actions)
         print(f"[Distillation] Action difference MSE: {action_diff.item()}")
-        action_differences.append(action_diff.item())
+        self.action_differences.append(action_diff.item())
         
         # If actions are significantly different, distill PSO policy
         if action_diff.item() > self.mse_thres:
@@ -236,7 +237,7 @@ class SequentialPSOCallback(BaseCallback):
                 actor.optimizer.step()
             
             print(f"[Distillation] Distillation complete, final loss: {loss.item()}")
-            distillation_events.append((self.n_calls, self.best_reward))
+            self.distillation_events.append((self.n_calls, self.best_reward))
 
     def _build_model_from_pso_weights(self, pso_weights, input_dim, output_dim, hidden_dims=[64, 64]):
         model = ActorNet(input_dim, output_dim, hidden_dims)
@@ -261,15 +262,15 @@ class SequentialPSOCallback(BaseCallback):
         """Generate and save learning curve plot"""
         plt.figure(figsize=(10, 6))
         
-        if sac_rewards:
-            plt.plot(timestamps, sac_rewards, 'b-', label='SAC')
+        if self.sac_rewards:
+            plt.plot(self.timestamps, self.sac_rewards, 'b-', label='SAC')
         
-        if pso_rewards:
-            pso_steps = [x[0] for x in pso_rewards]
-            pso_reward_values = [x[1] for x in pso_rewards]
+        if self.pso_rewards:
+            pso_steps = [x[0] for x in self.pso_rewards]
+            pso_reward_values = [x[1] for x in self.pso_rewards]
             plt.plot(pso_steps, pso_reward_values, 'r-', label='PSO')
         
-        for step, reward in distillation_events:
+        for step, reward in self.distillation_events:
             plt.axvline(x=step, color='g', linestyle='--', alpha=0.5)
         
         plt.xlabel('Timesteps')

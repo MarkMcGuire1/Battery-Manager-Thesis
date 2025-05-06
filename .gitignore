@@ -34,7 +34,7 @@ results/
 **/*results*/
 outputs/
 models/
-models/*
+plots/
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
